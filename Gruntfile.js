@@ -39,16 +39,34 @@ module.exports = function(grunt) {
     },
 
     copy: {
+      options: {
+        nonull: true
+      },
+
       cssAsScss: {
         files: [{
           expand: true,
           cwd: 'bower_components',
           src: [
+            'leaflet.markercluster/dist/MarkerCluster.css',
+            'leaflet.markercluster/dist/MarkerCluster.Default.css',
             'normalize-css/normalize.css'
           ],
           dest: 'bower_components',
           filter: 'isFile',
-          ext: '.scss'
+          ext: '.scss',
+          extDot: 'last'
+        }]
+      },
+      js: {
+        files: [{
+          expand: true,
+          cwd: 'bower_components',
+          src: [
+            'leaflet.markercluster/dist/leaflet.markercluster.js'
+          ],
+          dest: 'public',
+          filter: 'isFile'
         }]
       },
       public: {

@@ -9,6 +9,7 @@
   "license": "private",
   "ignore": [],
   "dependencies": {
-    "normalize-css": "~3.0.3"
+    "normalize-css": "~3.0.3",
+    "leaflet.markercluster": "~0.4.0"
   }
 }

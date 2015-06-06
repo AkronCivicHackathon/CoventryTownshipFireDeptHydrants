@@ -119,4 +119,5 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('default', ['clean', 'copy', 'compile-handlebars', 'sass:dev', 'browserSync', 'watch']);
+  grunt.registerTask('dist', ['clean', 'copy', 'compile-handlebars', 'sass:dist']);
 };

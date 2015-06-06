@@ -15,4 +15,18 @@ html, body {
 
 header {
   overflow: hidden;
+  padding: 10px 20px;
+}
+
+header p {
+  display: inline-block;
+  margin-left: 15px;
+}
+
+[name="address"] {
+  width: 300px;
+}
+
+.hidden {
+  display: none;
 }

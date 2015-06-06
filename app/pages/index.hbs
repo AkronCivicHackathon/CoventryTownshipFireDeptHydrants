@@ -15,19 +15,27 @@
   <link rel="stylesheet" href="/app.css" media="screen, projection">
 </head>
 <body>
-<!--  <a href="#" id="about" style="top:0px;bottom:0px;background:rgba(255,255,255,0.2) url('http://www.hackforchange.org/wp-content/themes/ndoch/images/map-up.png') no-repeat center;width:48px;height:65px;position:absolute;left:50%;margin-left:-24px;z-index:1017;">ABOUT</a>-->
   <header>
-    <h1>Hydrants</h1>
     <form>
-      <input type="text" placeholder="Enter an address">
-      <button type="submit">Search</button>
+      <input name="address" type="text" placeholder="Enter an address">
+      <input type="submit" value="Search">
       <button data-for="current-location">Use Current Location</button>
-      <button data-for="display-markers">Show Markers</button>
+      <p><a data-for="show-more-info" href="#">What is this?</a></p>
+      <div class="more-info hidden">
+        <hr>
+        <p>This will show the locations of fire hydrants in south Summit County that are within 1000 meters from the middle of the map.</p>
+        <p>You can click the "Use Current Location" button to center the map on your current location.
+          You can also enter an address in the search box to jump to that point on the map.</p>
+      </div>
     </form>
   </header>
   <div id="map"></div>
 
   <script>
+    // window.onerror = function(error) {
+    //   alert(error);
+    // }
+
     function redrawMap() {
       $('#map').css('height', $(window).height() - $('header').outerHeight());
       requestAnimationFrame(function() {
@@ -58,23 +66,32 @@
 
     L.tileLayer(tilePattern, {
       maxZoom: 22,
-      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery Â© <a href="http://mapbox.com">Mapbox</a>',
+      attribution: 'Built by Akron Civic Hackers',
       id: 'examples.map-i875mjb7'
     }).addTo(map);
+
+    map.on('moveend', _.debounce(function() {
+      if (markerGroupLayer) {
+        map.removeLayer(markerGroupLayer);
+      }
+
+      markerGroupLayer =
+        L.layerGroup(_.filter(markers, function(marker) {
+          return marker.getLatLng().distanceTo(map.getCenter()) < 1000;
+        })).addTo(map);
+    }, 500));
 
     function onLocationFound(e) {
       var radius = e.accuracy / 2;
 
       if (!userLocationMarker) {
-        userLocationMarker = L.marker(e.latlng);
+        userLocationMarker = L.circleMarker(e.latlng, radius);
         userLocationMarker.addTo(map);
       } else {
         userLocationMarker.setLatLng(e.latlng);
       }
 
-      map.panTo(e.latlng);
+      map.panTo(e.latlng, 16);
     }
 
     function onLocationError(e) {
@@ -100,7 +117,7 @@
 
     omnivore.csv(dataURL).on('ready', function(layer) {
       this.eachLayer(function(marker) {
-        marker.setIcon(hydrantIcon);
+        // marker.setIcon(hydrantIcon);
         marker.bindPopup(popupInfo(marker));
         markers.push(marker);
       });
@@ -111,23 +128,10 @@
       map.locate();
     });
 
-    $('header [data-for="display-markers"]').on('click', function(event) {
+    function lookupAddress(event) {
       event.preventDefault();
 
-      if (markerGroupLayer) {
-        markerGroupLayer.clearLayers();
-      }
-
-      markerGroupLayer =
-        L.layerGroup(_.filter(markers, function(marker) {
-          return userLocationMarker && marker.getLatLng().distanceTo(userLocationMarker.getLatLng()) < 1000;
-        })).addTo(map);
-    });
-
-    $('header form').on('submit', function(event) {
-      event.preventDefault();
-
-      $.ajax('http://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent($(event.currentTarget).find('input').val()), {
+      $.ajax('http://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent($('input[name=address]').val()), {
       }).done(function(data) {
         if (data.results.length > 0) {
           var latLong = [data.results[0].geometry.location.lat, data.results[0].geometry.location.lng];
@@ -142,7 +146,15 @@
           map.panTo(latLong);
         }
       }).fail(function() { debugger });
-    });
+    }
+
+    $('header form [type="submit"]').on('click', lookupAddress);
+    $('header form').on('submit', lookupAddress);
+
+    $('[data-for="show-more-info"]').on('click', function(event) {
+      event.preventDefault();
+      $('.more-info').toggleClass('hidden');
+    })
   </script>
 </body>
 </html>

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
 
   <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 <script src='http://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
   <script src="/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
@@ -21,20 +22,38 @@
       <input type="text" placeholder="Enter an address">
       <button type="submit">Search</button>
       <button data-for="current-location">Use Current Location</button>
+      <button data-for="display-markers">Show Markers</button>
     </form>
   </header>
   <div id="map"></div>
 
   <script>
+    function redrawMap() {
+      $('#map').css('height', $(window).height() - $('header').outerHeight());
+      requestAnimationFrame(function() {
+        map.invalidateSize();
+      });
+    }
+
+    $(document).ready(function() {
+      requestAnimationFrame(redrawMap);
+    });
+
+    $(window).on('resize', _.debounce(function() {
+      requestAnimationFrame(redrawMap);
+    }, 1000));
+
     var hydrantIcon = L.icon({
       iconUrl: 'http://upload.wikimedia.org/wikipedia/commons/7/78/Hydrant.svg',
-      iconSize: [24,24],
-      iconAnchor: [12,12]
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
     });
     var map = L.map('map');
+    var markers = [];
     var tilePattern = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     var dataURL = '/SouthSummitHydrantsLatLng.csv';
     var userLocationMarker;
+    var markerGroupLayer;
     tilePattern = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
 
     L.tileLayer(tilePattern, {
@@ -83,12 +102,26 @@
       this.eachLayer(function(marker) {
         marker.setIcon(hydrantIcon);
         marker.bindPopup(popupInfo(marker));
+        markers.push(marker);
       });
-    }).addTo(map);
+    });
 
     $('header [data-for="current-location"]').on('click', function(event) {
       event.preventDefault();
       map.locate();
+    });
+
+    $('header [data-for="display-markers"]').on('click', function(event) {
+      event.preventDefault();
+
+      if (markerGroupLayer) {
+        markerGroupLayer.clearLayers();
+      }
+
+      markerGroupLayer =
+        L.layerGroup(_.filter(markers, function(marker) {
+          return userLocationMarker && marker.getLatLng().distanceTo(userLocationMarker.getLatLng()) < 1000;
+        })).addTo(map);
     });
 
     $('header form').on('submit', function(event) {

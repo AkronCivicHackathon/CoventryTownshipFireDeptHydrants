@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/CoffeeAndCode/mwux.coffeeandcode.com.git"
+    "url": "https://github.com/AkronCivicHackathon/CoventryTownshipFireDeptHydrants.git"
   },
   "author": "Akron Civic Hackathon",
   "license": "private",
   "bugs": {
-    "url": "https://github.com/CoffeeAndCode/mwux.coffeeandcode.com/issues"
+    "url": "https://github.com/AkronCivicHackathon/CoventryTownshipFireDeptHydrants/issues"
   },
-  "homepage": "https://github.com/CoffeeAndCode/mwux.coffeeandcode.com",
+  "homepage": "https://github.com/AkronCivicHackathon/CoventryTownshipFireDeptHydrants",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-browser-sync": "^2.1.3",

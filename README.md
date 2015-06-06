@@ -15,3 +15,9 @@ bower install
 ```
 
 You can now run a local webserver that hosts the application by running `grunt`.
+
+
+## Production
+
+You can build a production version of the application by running `grunt dist`.
+It will pull all of the files in the `public/` directory.

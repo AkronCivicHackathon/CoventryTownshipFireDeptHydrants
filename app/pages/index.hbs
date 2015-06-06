@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
 
+  <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 <script src='http://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
   <script src="/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
@@ -14,6 +15,14 @@
 </head>
 <body>
 <!--  <a href="#" id="about" style="top:0px;bottom:0px;background:rgba(255,255,255,0.2) url('http://www.hackforchange.org/wp-content/themes/ndoch/images/map-up.png') no-repeat center;width:48px;height:65px;position:absolute;left:50%;margin-left:-24px;z-index:1017;">ABOUT</a>-->
+  <header>
+    <h1>Hydrants</h1>
+    <form>
+      <input type="text" placeholder="Enter an address">
+      <button type="submit">Search</button>
+      <button data-for="current-location">Use Current Location</button>
+    </form>
+  </header>
   <div id="map"></div>
 
   <script>
@@ -25,8 +34,8 @@
     var map = L.map('map');
     var tilePattern = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     var dataURL = '/SouthSummitHydrantsLatLng.csv';
-    var userLocation;
-    //tilePattern = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
+    var userLocationMarker;
+    tilePattern = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
 
     L.tileLayer(tilePattern, {
       maxZoom: 22,
@@ -38,20 +47,25 @@
 
     function onLocationFound(e) {
       var radius = e.accuracy / 2;
-      userLocation = e.latlng;
 
-      L.marker(e.latlng).addTo(map);
-      L.circle(e.latlng, radius).addTo(map);
+      if (!userLocationMarker) {
+        userLocationMarker = L.marker(e.latlng);
+        userLocationMarker.addTo(map);
+      } else {
+        userLocationMarker.setLatLng(e.latlng);
+      }
+
+      map.panTo(e.latlng);
     }
 
     function onLocationError(e) {
-      alert(e.message);
+      console.log(e.message);
     }
 
     function popupInfo(markerOrPopup) {
       var content = '<p>' + markerOrPopup.getLatLng().toString() + '</p>';
-      if (userLocation) {
-        content += '<p>' + markerOrPopup.getLatLng().distanceTo(userLocation) + ' meters away</p>';
+      if (userLocationMarker) {
+        content += '<p>' + markerOrPopup.getLatLng().distanceTo(userLocationMarker.getLatLng()) + ' meters away</p>';
       }
 
       return content;
@@ -64,7 +78,6 @@
     });
 
     map.setView([40.98701, -81.47086], 16);
-    map.locate();
 
     omnivore.csv(dataURL).on('ready', function(layer) {
       this.eachLayer(function(marker) {
@@ -72,6 +85,31 @@
         marker.bindPopup(popupInfo(marker));
       });
     }).addTo(map);
+
+    $('header [data-for="current-location"]').on('click', function(event) {
+      event.preventDefault();
+      map.locate();
+    });
+
+    $('header form').on('submit', function(event) {
+      event.preventDefault();
+
+      $.ajax('http://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent($(event.currentTarget).find('input').val()), {
+      }).done(function(data) {
+        if (data.results.length > 0) {
+          var latLong = [data.results[0].geometry.location.lat, data.results[0].geometry.location.lng];
+
+          if (!userLocationMarker) {
+            userLocationMarker = L.marker(latLong);
+            userLocationMarker.addTo(map);
+          } else {
+            userLocationMarker.setLatLng(latLong);
+          }
+
+          map.panTo(latLong);
+        }
+      }).fail(function() { debugger });
+    });
   </script>
 </body>
 </html>

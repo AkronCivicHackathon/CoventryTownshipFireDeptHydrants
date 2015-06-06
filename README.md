@@ -5,9 +5,9 @@ Repository for Coventry Township Fire Departments Hydrants mapping. All source f
 
 ## Development
 
-The project uses Node/NPM, Bower, and Grunt for compiling the web files. Check
-their websites for installation instructions, then install the project dependencies
-with:
+The project uses [Node/NPM](https://nodejs.org/), [Bower](http://bower.io/), and
+[Grunt](http://gruntjs.com/) for compiling the web files. Check their websites
+for installation instructions, then install the project dependencies with:
 
 ```bash
 npm install

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coventry Fire Department Hydrants Project</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+<script src='http://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
+  <link rel="stylesheet" href="/app.css" media="screen, projection">
+</head>
+<body>
+<!--  <a href="#" id="about" style="top:0px;bottom:0px;background:rgba(255,255,255,0.2) url('http://www.hackforchange.org/wp-content/themes/ndoch/images/map-up.png') no-repeat center;width:48px;height:65px;position:absolute;left:50%;margin-left:-24px;z-index:1017;">ABOUT</a>-->
+  <div id="map"></div>
+
+  <script>
+    var hydrantIcon = L.icon({
+      iconUrl: 'http://upload.wikimedia.org/wikipedia/commons/7/78/Hydrant.svg',
+      iconSize: [24,24],
+      iconAnchor: [12,12]
+    });
+    var map = L.map('map');
+    var tilePattern = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var dataURL = '/SouthSummitHydrantsLatLng.csv';
+    var userLocation;
+    //tilePattern = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
+
+    L.tileLayer(tilePattern, {
+      maxZoom: 22,
+      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery Â© <a href="http://mapbox.com">Mapbox</a>',
+      id: 'examples.map-i875mjb7'
+    }).addTo(map);
+
+    function onLocationFound(e) {
+      var radius = e.accuracy / 2;
+      userLocation = e.latlng;
+
+      L.marker(e.latlng).addTo(map);
+      L.circle(e.latlng, radius).addTo(map);
+    }
+
+    function onLocationError(e) {
+      alert(e.message);
+    }
+
+    function popupInfo(markerOrPopup) {
+      var content = '<p>' + markerOrPopup.getLatLng().toString() + '</p>';
+      if (userLocation) {
+        content += '<p>' + markerOrPopup.getLatLng().distanceTo(userLocation) + ' meters away</p>';
+      }
+
+      return content;
+    }
+
+    map.on('locationfound', onLocationFound);
+    map.on('locationerror', onLocationError);
+    map.on('popupopen', function(event) {
+      event.popup.setContent(popupInfo(event.popup));
+    });
+
+    map.setView([40.98701, -81.47086], 16);
+    map.locate();
+
+    omnivore.csv(dataURL).on('ready', function(layer) {
+      this.eachLayer(function(marker) {
+        marker.setIcon(hydrantIcon);
+        marker.bindPopup(popupInfo(marker));
+      });
+    }).addTo(map);
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "hydrants",
+  "version": "0.0.0",
+  "private": true,
+  "homepage": "https://github.com/CoffeeAndCode/mwux.coffeeandcode.com",
+  "authors": [
+    "Akron Civic Hackathon"
+  ],
+  "license": "private",
+  "ignore": [],
+  "dependencies": {
+    "normalize-css": "~3.0.3"
+  }
+}

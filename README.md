@@ -12,6 +12,11 @@ for installation instructions, then install the project dependencies with:
 ```bash
 npm install
 bower install
+apt-get install ruby-full
+gem install sass
+npm install grunt-cli grunt-browser-sync grunt-contrib-clean grunt-contrib-copy grunt-contrib-sass grunt-contrib-watch normalize.css
+bower install leaflet.markercluster #as a non-root user
+grunt dist
 ```
 
 You can now run a local webserver that hosts the application by running `grunt`.
@@ -20,4 +25,4 @@ You can now run a local webserver that hosts the application by running `grunt`.
 ## Production
 
 You can build a production version of the application by running `grunt dist`.
-It will pull all of the files in the `public/` directory.
+It will pull all of the files in the `public/` directory, which can be deployed to a simple webserver.
